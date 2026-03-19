@@ -1,0 +1,22 @@
+﻿Task,Target,Model,Metric1_Name,Metric1_Value,Metric2_Name,Metric2_Value
+A. Mixture Order,mixture_order,PLS-DA (5 LV),Accuracy CV,0.6413327526132404,F1 Macro CV,0.5455350518391419
+A. Mixture Order,mixture_order,Ridge (a=10),Accuracy CV,0.7498706635358279,F1 Macro CV,0.6938838920479703
+A. Mixture Order,mixture_order,RF (n=100),Accuracy CV,0.7584333813058628,F1 Macro CV,0.6864125291250769
+B. Substance Presence,has_mba,PLS-DA (5 LV),Accuracy CV,0.8859597030752916,F1 Macro CV,0.8331742312286584
+B. Substance Presence,has_mba,Ridge (a=10),Accuracy CV,0.8711449022875323,F1 Macro CV,0.8301929728648185
+B. Substance Presence,has_mba,RF (n=100),Accuracy CV,0.8847329950007575,F1 Macro CV,0.820866630141541
+B. Substance Presence,has_thiram,PLS-DA (5 LV),Accuracy CV,0.8064028177548856,F1 Macro CV,0.7160889460014936
+B. Substance Presence,has_thiram,Ridge (a=10),Accuracy CV,0.8993228298742615,F1 Macro CV,0.8695204980982372
+B. Substance Presence,has_thiram,RF (n=100),Accuracy CV,0.8149166792910165,F1 Macro CV,0.7763243267838446
+B. Substance Presence,has_mg,PLS-DA (5 LV),Accuracy CV,0.5604446296015755,F1 Macro CV,0.5159063976408106
+B. Substance Presence,has_mg,Ridge (a=10),Accuracy CV,0.7225552946523254,F1 Macro CV,0.6898628900807486
+B. Substance Presence,has_mg,RF (n=100),Accuracy CV,0.767178268444175,F1 Macro CV,0.7166899309828775
+C. Concentration Reg,c_mba,PLS (5 LV),R2 CV,0.29154225508567644,RMSE CV,1.7916108973668075
+C. Concentration Reg,c_mba,Ridge (a=10),R2 CV,0.12372893090583237,RMSE CV,2.027442678344958
+C. Concentration Reg,c_mba,RF (n=100),R2 CV,0.4736416515225136,RMSE CV,1.6041213751149876
+C. Concentration Reg,c_thiram,PLS (5 LV),R2 CV,-0.08987220659235999,RMSE CV,2.062650959119917
+C. Concentration Reg,c_thiram,Ridge (a=10),R2 CV,0.1707992892823061,RMSE CV,1.7997906845675857
+C. Concentration Reg,c_thiram,RF (n=100),R2 CV,0.2547234238574192,RMSE CV,1.7650586180419663
+C. Concentration Reg,c_mg,PLS (5 LV),R2 CV,-0.4317024767509118,RMSE CV,2.722032660166601
+C. Concentration Reg,c_mg,Ridge (a=10),R2 CV,-0.28765900905437636,RMSE CV,2.5922169375679975
+C. Concentration Reg,c_mg,RF (n=100),R2 CV,0.010246348351972957,RMSE CV,2.2722288914429356
