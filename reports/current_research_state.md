@@ -2,7 +2,7 @@
 > 生成时间: 2026-03-19 13:28:39
 
 ## 1. 数据直接支持的结论
-- 混合拉曼光谱对 Thiram 和 MG 的存在性检测 (presence) 具有可靠的判别力 (Macro-F1 约 0.85-0.90)。
+- 混合拉曼光谱对 Thiram 和 MG 的存在性检测 (presence) 具有可靠的判别力 (Macro-F1 约 0.74-0.83)。
 - 同一 folder 内的光谱为 technical replicates，存在 folder-level dependence，随机切分会造成泄漏。
 - 当前全谱特征对"是否存在"的辨别远强于对"具体浓度等级 (4/5/6 ppm)"的区分。
 

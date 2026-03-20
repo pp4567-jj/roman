@@ -150,7 +150,7 @@ def main():
             if 'RF' in model_name:
                 save_confusion_matrix(y_true_all, y_pred_all, classes,
                                       f"{tk['id']}: {tk['col']} ({model_name}) Overall CV",
-                                      FIGURE_DIR / f"{tk['id'].replace(' ','')}_{tk['col']}_{model_name.split('(')[0]}.png")
+                                      FIGURE_DIR / f"cm_{tk['col']}.png")
 
     res_df = pd.DataFrame(results)
     csv_path = OUTPUT_DIR / "baseline_results_v2.csv"
