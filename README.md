@@ -45,11 +45,8 @@
 │   ├── phase1_inventory.py            # 阶段1: 数据清点
 │   ├── parse_metadata.py              # 阶段2: 元数据解析
 │   ├── preprocess_spectra.py          # 阶段3: 预处理
-│   ├── phase4_5_eda_split_revised.py  # 阶段4+5(修订版)
-│   ├── phase6_baseline_models_revised.py # 阶段6(修订版)
-│   ├── phase7_mba_reference_strategy.py  # 阶段7: MBA探索
 │   ├── run_realign.py                 # 历史重构脚本
-│   └── full_rebuild.py                # 总重构脚本
+│   └── full_rebuild.py                # 总重构脚本 (唯一临时现役入口)
 ├── data/
 │   ├── metadata_v1.csv                # 主元数据
 │   ├── processed/                     # 预处理后的 .npy 文件
@@ -68,7 +65,6 @@
 │   ├── baseline_report_revised.md
 │   ├── modeling_scope_revised.md
 │   ├── mba_reference_strategy.md
-│   ├── current_research_state.md
 │   └── change_log_revised.md
 └── archive/                           # 归档区(不再现役)
     ├── deprecated_reports/            # 旧版报告
@@ -105,5 +101,9 @@
 4. 当前不支持连续定量结论
 5. Folder-level clustering 的物理来源未确认
 
-## 8. 更新规则
-每次模型、split、图表或任务变化，优先更新本 README。不通过生成额外说明文档替代 README。
+## 8. 执行入口说明
+当前建议以 `scripts/full_rebuild.py` 作为临时唯一现役执行入口。
+这只是当前为阻断子脚本遗留命名污染和统合输出的执行约定，绝对不代表该脚本已经完全理想化（例如后续还面临目标覆盖不足审计及图表模型解耦等进一步加固任务）。
+
+## 9. 更新规则
+每次模型、split、图表或任务变化，优先更新本 README。不通过生成额外说明文档（如夸大表现的总结类 md）替代 README。

@@ -9,11 +9,8 @@
 | scripts/parse_metadata.py | 阶段2: 元数据解析 |
 | scripts/preprocess_spectra.py | 阶段3: 预处理 |
 | scripts/phase1_inventory.py | 阶段1: 数据清点 |
-| scripts/phase4_5_eda_split_revised.py | 阶段4+5: EDA与划分(修订版) |
-| scripts/phase6_baseline_models_revised.py | 阶段6: 基线建模(修订版) |
-| scripts/phase7_mba_reference_strategy.py | 阶段7: MBA内标化探索 |
 | scripts/run_realign.py | 总控重构脚本(历史) |
-| scripts/full_rebuild.py | 本次总重构脚本 |
+| scripts/full_rebuild.py | 本次总重构脚本 (唯一临时入口) |
 | data/metadata_v1.csv | 主元数据 |
 | data/splits/cv_split_v2.csv | 现役划分方案 |
 | data/models/baseline_results_final.csv | 现役模型结果 |
@@ -32,8 +29,12 @@
 | scripts/audit_and_evaluate.py | archive/deprecated_scripts/ | 旧版审计脚本 |
 | scripts/_check_inventory.py | archive/deprecated_scripts/ | 临时检查脚本 |
 | scripts/baseline_models.py | archive/deprecated_scripts/ | 含连续回归和MBA并列 |
+| scripts/phase4_5_eda_split_revised.py | archive/deprecated_scripts/ | 已由full_rebuild.py收口，阻断旧流程复现污染 |
+| scripts/phase6_baseline_models_revised.py | archive/deprecated_scripts/ | 已由full_rebuild.py收口，阻断旧图表命名污染 |
+| scripts/phase7_mba_reference_strategy.py | archive/deprecated_scripts/ | 已由full_rebuild.py收口 |
 | analyze_dataset.py | archive/deprecated_scripts/ | 根目录遗留脚本 |
 | reports/report_for_supervisor.md | archive/deprecated_reports/ | 导师汇报文件 |
+| reports/current_research_state.md | archive/deprecated_reports/ | 含夸大数据判定，发生了一致性漂移，不作为当前真源 |
 | reports/round2_audit_report.md | archive/deprecated_reports/ | 旧版审计(含batch effect) |
 | reports/eda_report.md | archive/deprecated_reports/ | 旧版EDA(含batch effect) |
 | reports/split_report.md | archive/deprecated_reports/ | 旧版划分报告 |
