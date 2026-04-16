@@ -1,75 +1,112 @@
-# SERS 多组分分析：通过拉曼光谱预测混合物质及其浓度
+# SERS 多组分分析项目
 
-## 项目目标
-利用 SERS（表面增强拉曼光谱）技术，基于 AgNPs（Lee-Meisel 法制备银纳米颗粒）基底，
-对 **Thiram（福美双）、Malachite Green（孔雀石绿）、MBA（4-巯基苯甲酸）** 三种物质的
-单组分/二元/三元混合体系进行 **定性识别（是否存在）** 和 **浓度等级分类（0/4/5/6 ppm）**。
+本项目用于根据 SERS 拉曼光谱同时判断 Thiram、MG、MBA 三种物质的有无与浓度等级，当前仓库代码已经整理为可直接上传服务器运行的 Round 4 版本。
 
-## 核心策略
-**Strategy 3: MBA 作为普通组分**
-- MBA、Thiram、MG 三种物质地位平等，均作为目标分析物
-- 不使用 MBA 作为内标/探针进行归一化
+## 当前 Round 4 重点
 
-## 数据概况
-- **光谱来源**: BWRam 785nm 拉曼光谱仪，AgNPs 基底（Lee-Meisel 法，无聚集剂，干燥法）
-- **混合体系**: 63 个文件夹，覆盖所有单组分/二元/三元浓度组合
-- **浓度等级**: 4, 5, 6 ppm（编码自 0.4, 0.5, 0.6 实际浓度）
-- **命名规则**: 美X=Thiram Xppm, KX=MG Xppm, mX=MBA Xppm
+- 保留原始 4 类浓度任务：0 / 4 / 5 / 6 ppm
+- 新增 3 类半定量任务：0 / 4 / 5+6 ppm
+- 深度学习损失改为 Focal Loss，并启用类别权重
+- 特征工程新增二阶导特征
+- 评估指标新增 Accuracy
+- 结果保存逻辑已修复，4 类和 3 类结果不会互相覆盖
 
-## 项目结构
-```
-├── run_pipeline.py          # 主入口脚本
-├── src/
-│   ├── config.py            # 全局配置（路径、超参数、任务定义）
-│   ├── dataset.py           # 数据加载、解析、预处理、分割
-│   ├── models.py            # 模型定义（RF, SVM, PLS-DA, 1D-CNN, 1D-ResNet）
-│   ├── train_eval.py        # 交叉验证训练与评估
-│   └── visualize.py         # EDA 与结果可视化
-├── 混合数据/美Km混合光谱/   # 原始光谱数据（63 个文件夹）
-├── data/
-│   ├── processed/           # 预处理后的 .npy 缓存
-│   ├── splits/              # CV 划分文件
-│   └── models/              # 模型评估结果
-├── figures/                 # 所有图表输出
-├── reports/                 # 自动生成的报告
-├── scripts/                 # 独立工具脚本（inventory, preprocessing）
-└── archive/                 # 历史废弃文件
-```
+## 数据与评估
 
-## 使用方法
-```bash
-# 完整流水线（数据准备 → EDA → 训练 → 报告）
-python run_pipeline.py
+- 光谱数：954
+- 文件夹组数：63
+- 波数点：1401
+- 交叉验证：5 折 StratifiedGroupKFold 思路，实际按已有 fold_id 分折
+- 分组键：folder_name
 
-# 仅数据准备
-python run_pipeline.py --step data
+## 任务设置
 
-# 仅训练（指定模型和预处理）
-python run_pipeline.py --step train --models RF SVM 1D-CNN --preprocess p1
+原始 7 个任务：
 
-# 强制重建所有缓存
-python run_pipeline.py --rebuild
-```
+- T1_thiram_conc
+- T2_mg_conc
+- T3_mba_conc
+- T4_thiram_pres
+- T5_mg_pres
+- T6_mba_pres
+- T7_mixture_order
 
-## 分类任务
-| 任务 | 目标 | 类别 |
-|------|------|------|
-| T1 | Thiram 浓度分类 | 0/4/5/6 ppm |
-| T2 | MG 浓度分类 | 0/4/5/6 ppm |
-| T3 | MBA 浓度分类 | 0/4/5/6 ppm |
-| T4 | Thiram 存在性 | 0/1 |
-| T5 | MG 存在性 | 0/1 |
-| T6 | MBA 存在性 | 0/1 |
-| T7 | 混合复杂度 | 1/2/3 |
+新增 3 个 3 类任务：
+
+- T1b_thiram_3c
+- T2b_mg_3c
+- T3b_mba_3c
+
+多任务 3 类阶段使用：3 类浓度 + 3 个 presence + mixture_order，共 7 个输出头。
 
 ## 模型
-- **RF**: Random Forest (200 trees)
-- **SVM**: RBF kernel SVM (C=10)
-- **PLS-DA**: Partial Least Squares Discriminant Analysis (10 LV)
-- **1D-CNN**: 4-block Conv1D + BN + ReLU + MaxPool → GAP → Dense
-- **1D-ResNet**: Residual 1D-CNN with skip connections
 
-## 交叉验证
-- 5-fold StratifiedGroupKFold
-- Group = folder_name（防止同一物理样本的技术重复进入不同折）
-- Stratify = family（确保各混合类型在每折中均衡分布）
+仓库当前支持 14 个模型名：
+
+- RF
+- SVM
+- PLS-DA
+- 1D-CNN
+- 1D-ResNet
+- Feature-KAN
+- MT-CNN
+- MT-ResNet
+- MT-KAN-CNN
+- MT-Feature-KAN
+- MT-CNN-3c
+- MT-ResNet-3c
+- MT-KAN-CNN-3c
+- MT-Feature-KAN-3c
+
+说明：1D-CNN、1D-ResNet、Feature-KAN 会同时用于 4 类与 3 类单任务阶段，但模型名保持不变，靠 Task 区分。
+
+## 一键运行
+
+推荐直接运行：
+
+```bash
+python batch_train.py
+```
+
+脚本会自动：
+
+- 检查并补齐 cv_split_v5.csv 中的 c_thiram_3c / c_mg_3c / c_mba_3c
+- 自动读取 raw、p1、p2、p3、p4 五种预处理数据
+- 分 6 个阶段完成全部训练与保存
+
+6 个阶段分别是：
+
+1. ML 跑原始 7 任务
+2. ML 跑 3 类任务
+3. 单任务 DL 跑原始 7 任务
+4. 单任务 DL 跑 3 类任务
+5. 多任务模型跑原始 7 任务
+6. 多任务 3 类模型跑 7 输出头任务
+
+## 结果文件
+
+结果默认写入 data/models：
+
+- cv_results_detail_*.csv
+- cv_results_summary_*.csv
+- cv_predictions_*.csv
+
+完整 Round 4 跑完后，每个预处理 summary 文件理论上应包含 116 行：
+
+- ML 原始任务 21 行
+- ML 3 类任务 9 行
+- 单任务 DL 原始任务 21 行
+- 单任务 DL 3 类任务 9 行
+- 多任务原始任务 28 行
+- 多任务 3 类任务 28 行
+
+## 关键文件
+
+- src/config.py：任务、超参数、路径
+- src/models.py：全部模型定义与注册表
+- src/feature_engineering.py：领域特征与二阶导特征
+- src/train_eval.py：CV、指标汇总、结果合并保存
+- batch_train.py：服务器上一键跑的主脚本
+- SERVER_MANUAL.md：服务器操作手册
+- server_update_prompt.txt：给新服务器 GPT 的对齐提示词
+- reports/experiment_history_archive.md：历史实验归档

@@ -1,6 +1,7 @@
 """
 Global configuration for the SERS multi-component analysis project.
 Strategy 3: MBA treated as a regular component (NOT internal standard).
+Round 4: 3-class concentration + Focal Loss + class_weight + 2nd-derivative features.
 """
 from pathlib import Path
 
@@ -33,22 +34,20 @@ COSMIC_WINDOW = 5
 N_FOLDS = 5
 SEED = 42
 
-# ====================== 1D-CNN / 1D-ResNet Hyperparameters ======================
-DL_LR = 1e-3
-DL_EPOCHS = 200      # more headroom with larger model; early stopping guards overfitting
-DL_PATIENCE = 15
-DL_BATCH = 256       # large batch for 3090-24GB; augmented data compensates SGD noise
+# ====================== DL Hyperparameters ======================
+DL_LR = 3e-4
+DL_EPOCHS = 200
+DL_PATIENCE = 20
+DL_BATCH = 128
 DL_WEIGHT_DECAY = 1e-4
-DL_VAL_FRAC = 0.15  # internal validation for early stopping
+DL_VAL_FRAC = 0.15
+DL_SCHEDULER = 'cosine'
 
 # ====================== Substance Naming ======================
-# Folder naming convention: 美X=Thiram Xppm, KX=MG Xppm, mX=MBA Xppm
-# e.g., 美4K5m6 = Thiram 4ppm + MG 5ppm + MBA 6ppm
 SUBSTANCE_CN = {'美': 'Thiram', 'K': 'MG', 'm': 'MBA'}
-CONC_LEVELS = [0, 4, 5, 6]  # possible ppm levels (0 = absent)
+CONC_LEVELS = [0, 4, 5, 6]
 
-# ====================== Task Definitions (Strategy 3) ======================
-# All three substances treated equally as target analytes
+# ====================== Task Definitions ======================
 TASKS = [
     {'id': 'T1_thiram_conc',  'name': 'Thiram Concentration',  'col': 'c_thiram', 'classes': [0, 4, 5, 6]},
     {'id': 'T2_mg_conc',      'name': 'MG Concentration',      'col': 'c_mg',     'classes': [0, 4, 5, 6]},
@@ -59,15 +58,38 @@ TASKS = [
     {'id': 'T7_mixture_order','name': 'Mixture Complexity',    'col': 'mixture_order', 'classes': [1, 2, 3]},
 ]
 
+TASKS_3CLASS = [
+    {'id': 'T1b_thiram_3c', 'name': 'Thiram Semi-Quant', 'col': 'c_thiram_3c', 'classes': [0, 1, 2]},
+    {'id': 'T2b_mg_3c', 'name': 'MG Semi-Quant', 'col': 'c_mg_3c', 'classes': [0, 1, 2]},
+    {'id': 'T3b_mba_3c', 'name': 'MBA Semi-Quant', 'col': 'c_mba_3c', 'classes': [0, 1, 2]},
+]
+
+TASKS_MT_FULL = [
+    {'id': 'T1b_thiram_3c', 'name': 'Thiram Semi-Quant', 'col': 'c_thiram_3c', 'classes': [0, 1, 2]},
+    {'id': 'T2b_mg_3c', 'name': 'MG Semi-Quant', 'col': 'c_mg_3c', 'classes': [0, 1, 2]},
+    {'id': 'T3b_mba_3c', 'name': 'MBA Semi-Quant', 'col': 'c_mba_3c', 'classes': [0, 1, 2]},
+    {'id': 'T4_thiram_pres', 'name': 'Thiram Presence', 'col': 'has_thiram', 'classes': [0, 1]},
+    {'id': 'T5_mg_pres', 'name': 'MG Presence', 'col': 'has_mg', 'classes': [0, 1]},
+    {'id': 'T6_mba_pres', 'name': 'MBA Presence', 'col': 'has_mba', 'classes': [0, 1]},
+    {'id': 'T7_mixture_order', 'name': 'Mixture Complexity', 'col': 'mixture_order', 'classes': [1, 2, 3]},
+]
+
 # ====================== KAN Hyperparameters ======================
-KAN_GRID_SIZE = 8
+KAN_GRID_SIZE = 5
 KAN_SPLINE_ORDER = 3
 
 # ====================== Data Augmentation ======================
-AUG_N = 3          # augmentation multiplier (3x → ~3000 training samples)
-AUG_ENABLED = True  # toggle for ablation
+AUG_N = 4
+AUG_ENABLED = True
+MIXUP_ENABLED = True
+MIXUP_ALPHA = 0.3
+LABEL_SMOOTHING = 0.1
 
-# Preprocessing pipeline names
+# ====================== Focal Loss ======================
+FOCAL_LOSS_GAMMA = 2.0
+USE_CLASS_WEIGHT = True
+
+# ====================== Preprocessing Names ======================
 PREPROCESS_NAMES = {
     'raw': 'Interpolated raw spectra',
     'p1': 'Cosmic removal + SG smooth + ALS baseline + SNV',

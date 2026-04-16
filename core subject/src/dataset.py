@@ -246,6 +246,113 @@ def augment_spectra(X, y, n_aug=5, seed=SEED):
     return np.concatenate(X_aug_list, axis=0), np.concatenate(y_aug_list, axis=0)
 
 
+def spectral_mixup(X, y, n_mix=None, alpha=0.3, seed=SEED):
+    """Spectral Mixup augmentation grounded in Beer-Lambert law.
+
+    For SERS spectra, linear combination of two spectra with different
+    concentrations produces a physically valid intermediate spectrum:
+        x_mix = lam * x_i + (1 - lam) * x_j
+        y_mix = y_i  (label of the dominant sample, lam >= 0.5)
+
+    Only applied to same-label pairs for classification stability.
+    Pairs from different labels are skipped (label interpolation is
+    meaningless for categorical concentration classes).
+
+    Args:
+        X: (n, d) spectra
+        y: (n,) integer labels
+        n_mix: number of mixup samples to generate (default: len(X))
+        alpha: Beta distribution parameter (smaller = closer to originals)
+        seed: random state
+
+    Returns:
+        X_mixed, y_mixed (only the new samples, NOT including originals)
+    """
+    rng = np.random.RandomState(seed)
+    n = len(X)
+    if n_mix is None:
+        n_mix = n
+
+    X_list, y_list = [], []
+    classes = np.unique(y)
+
+    # Build index per class for efficient same-class pairing
+    class_idx = {c: np.where(y == c)[0] for c in classes}
+
+    generated = 0
+    max_attempts = n_mix * 3
+    attempts = 0
+    while generated < n_mix and attempts < max_attempts:
+        attempts += 1
+        # Pick a random class weighted by class size
+        c = rng.choice(classes)
+        idx_c = class_idx[c]
+        if len(idx_c) < 2:
+            continue
+        i, j = rng.choice(idx_c, size=2, replace=False)
+        lam = rng.beta(alpha, alpha)
+        lam = max(lam, 1 - lam)  # ensure lam >= 0.5
+        x_new = lam * X[i] + (1 - lam) * X[j]
+        X_list.append(x_new)
+        y_list.append(y[i])  # same class, so label is unambiguous
+        generated += 1
+
+    if X_list:
+        return np.array(X_list), np.array(y_list)
+    return np.empty((0, X.shape[1])), np.empty(0, dtype=y.dtype)
+
+
+def spectral_mixup_mt(X, y_dict, n_mix=None, alpha=0.3, seed=SEED):
+    """Multi-task Mixup: only mix samples that share ALL task labels.
+
+    This is strict but physically correct: we only interpolate spectra
+    from the same mixture composition, producing valid intermediate
+    concentration spectra.
+    """
+    rng = np.random.RandomState(seed)
+    n = len(X)
+    if n_mix is None:
+        n_mix = n
+
+    # Create composite key from all task labels
+    tids = sorted(y_dict.keys())
+    keys = np.array([tuple(y_dict[t][i] for t in tids) for i in range(n)])
+    unique_keys = list(set(map(tuple, keys)))
+
+    key_to_idx = {}
+    for uk in unique_keys:
+        mask = np.all(keys == np.array(uk), axis=1)
+        key_to_idx[uk] = np.where(mask)[0]
+
+    X_list, y_lists = [], {t: [] for t in tids}
+    generated = 0
+    max_attempts = n_mix * 3
+    attempts = 0
+
+    while generated < n_mix and attempts < max_attempts:
+        attempts += 1
+        uk = unique_keys[rng.randint(len(unique_keys))]
+        indices = key_to_idx[uk]
+        if len(indices) < 2:
+            continue
+        i, j = rng.choice(indices, size=2, replace=False)
+        lam = rng.beta(alpha, alpha)
+        lam = max(lam, 1 - lam)
+        X_list.append(lam * X[i] + (1 - lam) * X[j])
+        for t in tids:
+            y_lists[t].append(y_dict[t][i])
+        generated += 1
+
+    if X_list:
+        X_mix = np.array(X_list)
+        y_mix = {t: np.array(v) for t, v in y_lists.items()}
+    else:
+        X_mix = np.empty((0, X.shape[1]))
+        y_mix = {t: np.empty(0, dtype=y_dict[t].dtype) for t in tids}
+
+    return X_mix, y_mix
+
+
 def augment_spectra_mt(X, y_dict, n_aug=5, seed=SEED):
     """Multi-task version: augments X and replicates all task labels in sync."""
     rng = np.random.RandomState(seed)
